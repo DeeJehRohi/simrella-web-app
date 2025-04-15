@@ -1,10 +1,10 @@
-//danjuma's implementation for the HeroSectionTab component with dummy data
+//danjuma's implementation using dummy datas
+
 "use client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { ChevronLeft } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 
@@ -20,6 +20,7 @@ interface HeroSection {
   images: HeroImage[];
   is_active: boolean;
   published_at: string;
+  isEditing?: boolean; // NEW
 }
 
 const dummyHeroSections: HeroSection[] = [
@@ -35,14 +36,13 @@ const dummyHeroSections: HeroSection[] = [
       { id: "img2", image_url: "/images/meeting-2.jpg" },
       { id: "img3", image_url: "/images/woman.jpg" },
     ],
+    isEditing: false,
   },
-  // You can add more hero sections here
 ];
 
 export function HeroSectionTab() {
-  const [activeSubTab, setActiveSubTab] = useState("view");
   const [heroSections, setHeroSections] =
-  useState<HeroSection[]>(dummyHeroSections);
+    useState<HeroSection[]>(dummyHeroSections);
   const router = useRouter();
 
   const handleToggle = (id: string) => {
@@ -58,6 +58,16 @@ export function HeroSectionTab() {
     });
   };
 
+  const handleEditToggle = (id: string) => {
+    setHeroSections((prev) =>
+      prev.map((section) =>
+        section.id === id
+          ? { ...section, isEditing: !section.isEditing }
+          : section
+      )
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -70,81 +80,237 @@ export function HeroSectionTab() {
         </button>
       </div>
 
-      {heroSections.map((hero, index) => (
+      {heroSections.map((hero) => (
         <div
           key={hero.id}
           className="grid grid-cols-1 md:grid-cols-2 gap-8 border rounded-lg p-6"
         >
-          {/* LEFT SIDE - Text Content */}
-          <div className="space-y-4">
-            <div>
-              <h3 className="font-semibold text-normal text-font">Title</h3>
-              <p className="text-sm text-font">{hero.title}</p>
-            </div>
-            <div>
-              <h4 className="font-semibold text-normal text-font">Sub title</h4>
-              <p className="text-sm text-font">{hero.subtitle}</p>
-            </div>
-            <p className="text-xs text-font pt-2">
-              Published {hero.published_at}
-            </p>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Active</span>
-              <Switch
-                checked={hero.is_active}
-                onCheckedChange={() => handleToggle(hero.id)}
-                className="
-      /* Base styles */
-      w-11 h-4 rounded-full border-2 transition-colors
-      
-      /* Unchecked state */
-      data-[state=unchecked]:bg-gray-100 
-      data-[state=unchecked]:border-gray-200
-      data-[state=unchecked]:border-1
-      
-      /* Checked state */
-      data-[state=checked]:bg-secondary
-      data-[state=checked]:border-secondary
-      
-      /* Thumb styles (the circle inside) */
-      [&>span]:h-5 [&>span]:w-5 
-      [&>span]:data-[state=unchecked]:translate-x-0.5
-      [&>span]:data-[state=checked]:translate-x-5
-      [&>span]:data-[state=checked]:bg-white
-      [&>span]:data-[state=unchecked]:bg-secondary
-    "
-              />
-            </div>
-          </div>
-
-          {/* RIGHT SIDE - Image Grid */}
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              {hero.images.map((img) => (
-                <div
-                  key={img.id}
-                  className="relative w-full aspect-video rounded-md overflow-hidden border border-gray-200"
-                >
-                  <Image
-                    src={
-                      img.image_url || "/placeholder.svg?height=80&width=150"
+          {hero.isEditing ? (
+            // Editable form
+            <>
+              {/* LEFT SIDE - Editable Text */}
+              <div className="space-y-4">
+                <div>
+                  <label className="block font-semibold text-sm text-gray-700">
+                    Title
+                  </label>
+                  <input
+                    type="text"
+                    value={hero.title}
+                    onChange={(e) =>
+                      setHeroSections((prev) =>
+                        prev.map((h) =>
+                          h.id === hero.id ? { ...h, title: e.target.value } : h
+                        )
+                      )
                     }
-                    alt="Carousel"
-                    fill
-                    className="object-cover"
+                    className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-400"
                   />
-                  {/* Optional: You can add a delete or overlay icon */}
                 </div>
-              ))}
-            </div>
 
-            {/* Add More Images & Toggle */}
-            <div className="flex items-center justify-between pt-2">
-              <button className="text-secondary text-sm border-1 border-orange-200 px-4 py-1.5 rounded-md hover:bg-orange-50 transition">
-                + Add More Images
-              </button>
-            </div>
-          </div>
+                <div>
+                  <label className="block font-semibold text-sm text-gray-700">
+                    Subtitle
+                  </label>
+                  <textarea
+                    value={hero.subtitle}
+                    onChange={(e) =>
+                      setHeroSections((prev) =>
+                        prev.map((h) =>
+                          h.id === hero.id
+                            ? { ...h, subtitle: e.target.value }
+                            : h
+                        )
+                      )
+                    }
+                    rows={4}
+                    className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-400"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-sm text-gray-700">
+                    Published Date
+                  </label>
+                  <input
+                    type="text"
+                    value={hero.published_at}
+                    onChange={(e) =>
+                      setHeroSections((prev) =>
+                        prev.map((h) =>
+                          h.id === hero.id
+                            ? { ...h, published_at: e.target.value }
+                            : h
+                        )
+                      )
+                    }
+                    className="w-full border px-4 py-2 rounded-md focus:outline-none focus:ring-1 focus:ring-orange-400"
+                  />
+                </div>
+              </div>
+
+              {/* RIGHT SIDE - Image Upload & Toggle */}
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {hero.images.map((img) => (
+                    <div
+                      key={img.id}
+                      className="relative w-full aspect-video rounded-md overflow-hidden border"
+                    >
+                      <Image
+                        src={img.image_url}
+                        alt="hero"
+                        fill
+                        className="object-cover"
+                      />
+                      <button
+                        onClick={() =>
+                          setHeroSections((prev) =>
+                            prev.map((h) =>
+                              h.id === hero.id
+                                ? {
+                                    ...h,
+                                    images: h.images.filter(
+                                      (i) => i.id !== img.id
+                                    ),
+                                  }
+                                : h
+                            )
+                          )
+                        }
+                        className="absolute top-1 right-1 bg-red-600 text-white text-xs px-2 py-0.5 rounded"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-sm text-gray-700 mb-1">
+                    Upload Images
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = e.target.files;
+                      if (files) {
+                        const newImages: HeroImage[] = Array.from(files).map(
+                          (file, idx) => ({
+                            id: `${hero.id}-new-${idx}`,
+                            image_url: URL.createObjectURL(file), // TEMP for preview
+                          })
+                        );
+                        setHeroSections((prev) =>
+                          prev.map((h) =>
+                            h.id === hero.id
+                              ? { ...h, images: [...h.images, ...newImages] }
+                              : h
+                          )
+                        );
+                      }
+                    }}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-1 file:px-4 file:rounded-md file:border-0 file:bg-orange-100 file:text-orange-700 hover:file:bg-orange-200"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <button className="text-orange-500 text-sm border border-orange-300 px-4 py-1.5 rounded-md hover:bg-orange-50 transition">
+                    + Add More Images
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-gray-600">Active</span>
+                    <Switch
+                      checked={hero.is_active}
+                      onCheckedChange={() => handleToggle(hero.id)}
+                      className="data-[state=checked]:bg-[#FF9B21]"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="col-span-1 md:col-span-2 pt-4">
+                <Button
+                  className="bg-orange-500 text-white hover:bg-orange-600"
+                  onClick={() => {
+                    toast("Changes Saved", {
+                      description: `Hero section ${hero.id} updated.`,
+                    });
+                    handleEditToggle(hero.id);
+                  }}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </>
+          ) : (
+            // Read-only view
+            <>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-semibold text-normal text-font">Title</h3>
+                  <p className="text-sm text-font">{hero.title}</p>
+                </div>
+                <div>
+                  <h4 className="font-semibold text-normal text-font">
+                    Sub title
+                  </h4>
+                  <p className="text-sm text-font">{hero.subtitle}</p>
+                </div>
+                <p className="text-xs text-font pt-2">
+                  Published {hero.published_at}
+                </p>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Active</span>
+                  <Switch
+                    checked={hero.is_active}
+                    onCheckedChange={() => handleToggle(hero.id)}
+                    className="w-11 h-4 rounded-full border-2 transition-colors
+                      data-[state=unchecked]:bg-gray-100 
+                      data-[state=unchecked]:border-gray-200
+                      data-[state=unchecked]:border-1
+                      data-[state=checked]:bg-secondary
+                      data-[state=checked]:border-secondary
+                      [&>span]:h-5 [&>span]:w-5 
+                      [&>span]:data-[state=unchecked]:translate-x-0.5
+                      [&>span]:data-[state=checked]:translate-x-5
+                      [&>span]:data-[state=checked]:bg-white
+                      [&>span]:data-[state=unchecked]:bg-secondary"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  {hero.images.map((img) => (
+                    <div
+                      key={img.id}
+                      className="relative w-full aspect-video rounded-md overflow-hidden border border-gray-200"
+                    >
+                      <Image
+                        src={img.image_url || "/placeholder.svg"}
+                        alt="Carousel"
+                        fill
+                        className="object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <button
+                    className="text-secondary text-sm border-1 border-orange-200 px-4 py-1.5 rounded-md hover:bg-secondary hover:text-white transition cursor-pointer"
+                    onClick={() => handleEditToggle(hero.id)}
+                  >
+                    Edit this Hero
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
         </div>
       ))}
     </div>
