@@ -207,17 +207,12 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
 
   return (
     <div className="w-full space-y-6 bg-[#EFF4FF] font-poppins">
-      <div className="flex flex-col space-y-6">
+      <div className="flex flex-col space-y-6 mt-10">
         {/* Header with back button and title */}
         <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="rounded-full"
-            onClick={() => router.back()}
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </Button>
+          <button className="rounded-full" onClick={() => router.back()}>
+            <ChevronLeft className="h-5 w-5" size={20} />
+          </button>
           <h1 className="text-2xl font-semibold">
             {isEdit ? "Edit Blog Post" : "Add New Posts"}
           </h1>
@@ -535,7 +530,7 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
                 variant="outline"
                 onClick={(e) => handleSubmit(e, "draft")}
                 disabled={isSubmitting}
-                className="bg-white border-secondary text-font hover:bg-secondary hover:text-white cursor-pointer"
+                className="bg-white border-orange-200 text-font hover:bg-secondary hover:text-white cursor-pointer"
               >
                 Save to draft
               </Button>
