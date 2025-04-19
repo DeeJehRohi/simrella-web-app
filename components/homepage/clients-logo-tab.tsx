@@ -241,21 +241,20 @@ export function ClientsLogoTab({ clientLogos, canEdit, onUpdate }: ClientsLogoTa
           <h2 className="text-2xl font-semibold">Clients Logo and Client Case study</h2>
 
           {canEdit && (
-            <Button
-              variant="outline"
-              className="border-[#FF9B21] text-[#FF9B21]"
+            <button
+              className="border-orange-200 text-[#FF9B21] cursor-pointer border-2 rounded-lg px-3 py-2 text-sm hover:bg-secondary hover:text-white flex items-center"
               onClick={() => setActiveSubTab("upload")}
             >
               <Plus className="h-4 w-4 mr-1" />
               Add New Images
-            </Button>
+            </button>
           )}
         </div>
       ) : (
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="rounded-full" onClick={() => setActiveSubTab("logos")}>
+          <button className="rounded-full pointer-cursor" onClick={() => setActiveSubTab("logos")}>
             <ChevronLeft className="h-5 w-5" />
-          </Button>
+          </button>
           <h2 className="text-2xl font-semibold">Upload Client Logo</h2>
         </div>
       )}

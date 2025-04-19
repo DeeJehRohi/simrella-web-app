@@ -117,49 +117,6 @@ export function ProductSectionForm({ product, onSuccess }: ProductSectionFormPro
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Image Upload */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Product Image</label>
-        <div
-          className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center justify-center cursor-pointer hover:border-[#FF9B21] transition-colors"
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onDrop={handleDrop}
-          onClick={() => imageInputRef.current?.click()}
-        >
-          {imagePreview ? (
-            <div className="relative w-full">
-              <Image
-                src={imagePreview || "/placeholder.svg"}
-                alt="Product image preview"
-                className="max-h-48 mx-auto object-contain"
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="mt-2 mx-auto flex items-center"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  setImage(null)
-                  setImagePreview(null)
-                }}
-              >
-                Change Image
-              </Button>
-            </div>
-          ) : (
-            <>
-              <Upload className="h-6 w-6 text-[#FF9B21] mb-2" />
-              <p className="text-[#FF9B21] font-medium">Upload a file</p>
-              <p className="text-gray-500 text-sm">or drag and drop</p>
-            </>
-          )}
-          <input ref={imageInputRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-        </div>
-        <p className="text-xs text-gray-500 mt-1">Recommended size: 600x400px, not more than 500kb</p>
-      </div>
-
       {/* Title */}
       <div className="mb-6">
         <label htmlFor="title" className="block text-sm font-medium mb-2">
@@ -170,7 +127,7 @@ export function ProductSectionForm({ product, onSuccess }: ProductSectionFormPro
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
-          className="w-full"
+          className="w-full border-gray-300 rounded-md"
           placeholder="Daas"
         />
       </div>
@@ -185,7 +142,7 @@ export function ProductSectionForm({ product, onSuccess }: ProductSectionFormPro
           value={summary}
           onChange={(e) => setSummary(e.target.value)}
           required
-          className="w-full"
+          className="w-full border-gray-300 rounded-md"
           placeholder="Data as a service is a complex approach aimed at monetization of MNO's Big Data relying on advanced techniques..."
           rows={6}
         />
@@ -201,29 +158,28 @@ export function ProductSectionForm({ product, onSuccess }: ProductSectionFormPro
           type="number"
           value={order}
           onChange={(e) => setOrder(Number.parseInt(e.target.value) || 0)}
-          className="w-full"
+          className="w-full border-gray-300 rounded-md"
           min={0}
         />
       </div>
 
-      {/* Set Active */}
-      <div className="mb-6 flex items-center gap-2">
-        <label htmlFor="active" className="text-sm font-medium">
-          Active
-        </label>
-        <Switch id="active" checked={isActive} onCheckedChange={setIsActive} />
-      </div>
-
       {/* Action Buttons */}
       <div className="flex items-center gap-4">
-        <Button type="button" variant="outline" onClick={onSuccess}>
+        <button
+          className="cursor-pointer border-2 border-gray-200 hover:bg-red-600 hover:text-white rounded-lg px-3 py-2 text-sm"
+          onClick={onSuccess}
+        >
           Cancel
-        </Button>
-        <Button type="submit" className="bg-[#FF9B21] hover:bg-[#e88c1d] text-white" disabled={isSubmitting}>
+        </button>
+        <button
+          type="submit"
+          className="cursor-pointer bg-secondary text-white rounded-lg px-3 py-2 text-sm hover:bg-orange-500"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "Saving..." : product?.id ? "Update" : "Create"}
-        </Button>
+        </button>
       </div>
     </form>
-  )
+  );
 }
 

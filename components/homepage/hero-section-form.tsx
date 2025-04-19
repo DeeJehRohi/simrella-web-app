@@ -145,7 +145,7 @@ export function HeroSectionForm({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 mt-10 lg:w-[955px] ">
       {/* Header with back button and title */}
       <div className="flex items-center gap-4">
         <button className="rounded-full" onClick={() => router.back()}>
