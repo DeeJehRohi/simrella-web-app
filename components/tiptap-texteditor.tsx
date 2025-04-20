@@ -1,4 +1,3 @@
-// components/tiptap/TiptapEditor.tsx
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -8,6 +7,8 @@ import BulletList from "@tiptap/extension-bullet-list";
 import OrderedList from "@tiptap/extension-ordered-list";
 import ListItem from "@tiptap/extension-list-item";
 import { useRef, useEffect } from "react";
+import TextStyle from "@tiptap/extension-text-style";
+import Underline from "@tiptap/extension-underline";
 import {
   AiOutlineBold,
   AiOutlineItalic,
@@ -35,13 +36,34 @@ export default function TiptapEditor({ content, onChange }: Props) {
       StarterKit.configure({
         bulletList: false,
         orderedList: false,
+        listItem: false,
       }),
-      BulletList,
-      OrderedList,
-      ListItem,
-      Link.configure({ openOnClick: false }),
+      BulletList.configure({
+        HTMLAttributes: {
+          class: "list-disc pl-4",
+        },
+      }),
+      OrderedList.configure({
+        HTMLAttributes: {
+          class: "list-decimal pl-4",
+        },
+      }),
+      ListItem.configure({
+        HTMLAttributes: {
+          class: "list-item",
+        },
+      }),
+      TextAlign.configure({
+        types: ["heading", "paragraph", "listItem"],
+      }),
+      TextStyle,
+      Underline,
       Image,
-      TextAlign.configure({ types: ["heading", "paragraph"] }),
+      Link.configure({
+        HTMLAttributes: {
+          class: "text-blue-500 hover:underline",
+        },
+      }),
     ],
     content,
     onUpdate({ editor }) {
