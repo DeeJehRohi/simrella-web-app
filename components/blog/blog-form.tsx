@@ -4,34 +4,20 @@ import type * as React from "react";
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import TiptapEditor from "@/components/tiptap-texteditor";
+import { ChevronLeft } from "lucide-react";
 import { toast } from "sonner";
+import { Upload } from "lucide-react";
 import { createBlogPost, updateBlogPost } from "@/actions/blog";
 import type { BlogPost } from "@/types/api";
-import {
-  ChevronLeft,
-  Upload,
-  Bold,
-  Italic,
-  Underline,
-  AlignLeft,
-  ImageIcon,
-  Link,
-  List,
-  Video,
-  Headphones,
-} from "lucide-react";
-import { Editor } from "@tinymce/tinymce-react";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 interface BlogFormProps {
   blogPost?: BlogPost;
   isEdit?: boolean;
 }
-
-// Define a proper type for the TinyMCE editor reference
-type TinyMCEEditorRef = import("@tinymce/tinymce-react").TinyMCEEditor;
 
 export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
   const router = useRouter();
@@ -44,8 +30,7 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
   const [relatedImagesPreview, setRelatedImagesPreview] = useState<string[]>(
     blogPost?.images?.map((img) => img.image_url) || []
   );
-
-  const editorRef = useRef<TinyMCEEditorRef | null>(null);
+  const [editorContent, setEditorContent] = useState(blogPost?.body || "");
 
   const bannerInputRef = useRef<HTMLInputElement>(null);
   const relatedImagesInputRef = useRef<HTMLInputElement>(null);
@@ -55,7 +40,6 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
       const file = e.target.files[0];
       setBannerImage(file);
 
-      // Create preview
       const reader = new FileReader();
       reader.onload = (event) => {
         setBannerImagePreview(event.target?.result as string);
@@ -71,7 +55,6 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
       const files = Array.from(e.target.files);
       setRelatedImages((prev) => [...prev, ...files]);
 
-      // Create previews
       files.forEach((file) => {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -85,7 +68,6 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
     }
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDragOver = (e: React.DragEvent, type: "banner" | "related") => {
     e.preventDefault();
     e.stopPropagation();
@@ -108,7 +90,6 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
         const file = e.dataTransfer.files[0];
         setBannerImage(file);
 
-        // Create preview
         const reader = new FileReader();
         reader.onload = (event) => {
           setBannerImagePreview(event.target?.result as string);
@@ -118,7 +99,6 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
         const files = Array.from(e.dataTransfer.files);
         setRelatedImages((prev) => [...prev, ...files]);
 
-        // Create previews
         files.forEach((file) => {
           const reader = new FileReader();
           reader.onload = (event) => {
@@ -144,24 +124,17 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
       const form = e.target as HTMLFormElement;
       const formData = new FormData(form);
 
-      // Add the banner image if selected
       if (bannerImage) {
         formData.set("banner_image", bannerImage);
       }
 
-      // Add related images if selected
       if (relatedImages.length > 0) {
         relatedImages.forEach((file) => {
           formData.append("related_images[]", file);
         });
       }
 
-      // Add the body content from the editor
-      if (editorRef.current) {
-        formData.set("body", editorRef.current.getContent());
-      }
-
-      // Set the status
+      formData.set("body", editorContent);
       formData.set("status", status);
 
       let response;
@@ -199,7 +172,6 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
   };
 
   const handlePreview = () => {
-    // Implement preview functionality
     toast("Preview", {
       description: "Preview functionality not implemented yet",
     });
@@ -208,7 +180,6 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
   return (
     <div className="w-full space-y-6 bg-[#EFF4FF] font-poppins">
       <div className="flex flex-col space-y-6 mt-10">
-        {/* Header with back button and title */}
         <div className="flex items-center gap-4">
           <button className="rounded-full" onClick={() => router.back()}>
             <ChevronLeft className="h-5 w-5" size={20} />
@@ -304,121 +275,15 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
               />
             </div>
 
-            {/* Story Body */}
+            {/* Story Body with Tiptap Editor */}
             <div className="mb-6 w-3/5">
               <label htmlFor="body" className="block text-sm font-medium mb-2">
                 Story body*
               </label>
               <div className="border border-gray-300 rounded-md">
-                {/* Editor toolbar */}
-                <div className="flex items-center gap-1 p-2 border-b border-gray-300">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <Bold className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <Italic className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <Underline className="h-4 w-4" />
-                  </Button>
-                  <div className="h-5 w-px bg-gray-300 mx-1"></div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <AlignLeft className="h-4 w-4" />
-                  </Button>
-                  <div className="h-5 w-px bg-gray-300 mx-1"></div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <ImageIcon className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <Link className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <Video className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0"
-                  >
-                    <Headphones className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                {/* TinyMCE Editor */}
-                <Editor
-                  onInit={(evt, editor) => (editorRef.current = editor)}
-                  initialValue={blogPost?.body || ""}
-                  init={{
-                    height: 300,
-                    menubar: false,
-                    plugins: [
-                      "advlist",
-                      "autolink",
-                      "lists",
-                      "link",
-                      "image",
-                      "charmap",
-                      "preview",
-                      "anchor",
-                      "searchreplace",
-                      "visualblocks",
-                      "code",
-                      "fullscreen",
-                      "insertdatetime",
-                      "media",
-                      "table",
-                      "code",
-                      "help",
-                      "wordcount",
-                    ],
-                    toolbar: false, // We're using our custom toolbar
-                    content_style:
-                      "body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px }",
-                  }}
+                <TiptapEditor
+                  content={editorContent}
+                  onChange={(content) => setEditorContent(content)}
                 />
               </div>
             </div>
@@ -501,7 +366,7 @@ export function BlogForm({ blogPost, isEdit = false }: BlogFormProps) {
             <div className="mb-16 w-3/5">
               <label
                 htmlFor="caption"
-                className="block text-sm font-medium mb-2 "
+                className="block text-sm font-medium mb-2"
               >
                 Caption (Optional)
               </label>

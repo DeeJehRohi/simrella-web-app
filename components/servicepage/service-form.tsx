@@ -3,153 +3,21 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { AlignLeft, AlignCenter, AlignRight, ImageIcon } from "lucide-react";
-import {
-  FileImage,
-  ChevronLeft,
-  Bold,
-  Italic,
-  List,
-  Underline,
-} from "lucide-react";
+import TiptapEditor from "@/components/tiptap-texteditor";
 import { useRouter } from "next/navigation";
-import Link from "@tiptap/extension-link";
-import Image from "@tiptap/extension-image";
-import TextAlign from "@tiptap/extension-text-align";
-
-import { useEditor, EditorContent } from "@tiptap/react";
-import StarterKit from "@tiptap/starter-kit";
-import UnderlineExtension from "@tiptap/extension-underline";
-
-const Toolbar = ({ editor }: { editor: any }) => {
-  if (!editor) return null;
-
-  const handleAddLink = () => {
-    const url = prompt("Enter URL");
-    if (url) {
-      editor.chain().focus().setLink({ href: url }).run();
-    }
-  };
-
-  const handleAddImage = () => {
-    const url = prompt("Enter image URL");
-    if (url) {
-      editor.chain().focus().setImage({ src: url }).run();
-    }
-  };
-
-  return (
-    <div className="flex gap-2 flex-wrap mb-2">
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBold().run()}
-        className={editor.isActive("bold") ? "bg-orange-100" : ""}
-      >
-        <Bold size={16} />
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleItalic().run()}
-        className={editor.isActive("italic") ? "bg-orange-100" : ""}
-      >
-        <Italic size={16} />
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleUnderline().run()}
-        className={editor.isActive("underline") ? "bg-orange-100" : ""}
-      >
-        <Underline size={16} />
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => editor.chain().focus().toggleBulletList().run()}
-        className={editor.isActive("bulletList") ? "bg-orange-100" : ""}
-      >
-        <List size={16} />
-      </Button>
-      <Button variant="outline" size="sm" onClick={handleAddLink}>
-        🔗
-      </Button>
-      <Button variant="outline" size="sm" onClick={handleAddImage}>
-        <ImageIcon className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => editor.chain().focus().setTextAlign("left").run()}
-        className={
-          editor.isActive({ textAlign: "left" }) ? "bg-orange-100" : ""
-        }
-      >
-        <AlignLeft className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => editor.chain().focus().setTextAlign("center").run()}
-        className={
-          editor.isActive({ textAlign: "center" }) ? "bg-orange-100" : ""
-        }
-      >
-        <AlignCenter className="w-4 h-4" />
-      </Button>
-      <Button
-        variant="outline"
-        size="sm"
-        onClick={() => editor.chain().focus().setTextAlign("right").run()}
-        className={
-          editor.isActive({ textAlign: "right" }) ? "bg-orange-100" : ""
-        }
-      >
-        <AlignRight className="w-4 h-4" />
-      </Button>
-    </div>
-  );
-};
-
+import { ChevronLeft, FileImage } from "lucide-react";
 
 export default function CreateServiceForm() {
   const router = useRouter();
   const isEdit = false;
+
+  // State management
   const [image, setImage] = useState<File | null>(null);
   const [longTitle, setLongTitle] = useState("");
   const [shortTitle, setShortTitle] = useState("");
-
-  const shortDescEditor = useEditor({
-    extensions: [
-      StarterKit,
-      UnderlineExtension,
-      Link.configure({
-        openOnClick: true,
-      }),
-      Image,
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
-    ],
-    content: "",
-  });
-
-  const longDescEditor = useEditor({
-    extensions: [
-      StarterKit,
-      UnderlineExtension,
-      Link.configure({
-        openOnClick: true,
-      }),
-      Image,
-      TextAlign.configure({
-        types: ["heading", "paragraph"],
-      }),
-    ],
-    content: "",
-  });
-
+  const [shortDesc, setShortDesc] = useState("");
+  const [longDesc, setLongDesc] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.[0]) {
@@ -158,9 +26,7 @@ export default function CreateServiceForm() {
   };
 
   const handlePublish = () => {
-    const shortDesc = shortDescEditor?.getHTML();
-    const longDesc = longDescEditor?.getHTML();
-
+    setIsSubmitting(true);
     console.log({
       image,
       longTitle,
@@ -170,13 +36,16 @@ export default function CreateServiceForm() {
     });
 
     // Submit to backend here
+    // await yourApiCall({ image, longTitle, shortTitle, shortDesc, longDesc });
+
+    setIsSubmitting(false);
   };
 
   return (
     <div className="w-full space-y-6 bg-[#EFF4FF] font-poppins">
       {/* Header */}
       <div className="flex items-center gap-4">
-        <button className="rounded-full" onClick={() => router.back()}>
+        <button className="rounded-full cursor-pointer" onClick={() => router.back()}>
           <ChevronLeft className="h-5 w-5" size={20} />
         </button>
         <h1 className="text-2xl font-semibold">
@@ -184,75 +53,93 @@ export default function CreateServiceForm() {
         </h1>
       </div>
 
-      {/* Image Upload */}
+      {/* Form Content */}
       <div className="bg-white lg:w-[955px] p-6">
+        {/* Image Upload */}
         <div className="mb-6 w-3/5">
-          <label className="block mb-2 text-sm font-medium">Upload Image</label>
+          <label className="block mb-2 text-sm font-medium">
+            Upload Image*
+          </label>
           <div className="border-2 border-dashed border-orange-300 rounded-md p-4 flex flex-col items-center text-sm text-gray-500 cursor-pointer hover:bg-orange-50 transition-colors">
             <FileImage className="w-6 h-6 mb-2 text-orange-400" />
-            <span>picture</span>
-            <p className="mt-2 text-xs">not more than 500kb</p>
+            <span>Click to upload or drag and drop</span>
+            <p className="mt-2 text-xs">PNG, JPG (Max. 500kb)</p>
             <Input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              className="mt-4"
+              className="hidden"
+              id="image-upload"
             />
+            <label
+              htmlFor="image-upload"
+              className="mt-2 text-sm text-[#FF9B21] font-medium cursor-pointer"
+            >
+              Select file
+            </label>
           </div>
         </div>
 
         {/* Titles */}
-        <div className="mb-4 w-3/5">
-          <label className="block mb-1 font-medium">Long title*</label>
+        <div className="mb-6 w-3/5">
+          <label className="block mb-2 text-sm font-medium">Long title*</label>
           <Input
-            placeholder="Enter long title"
+            placeholder="Enter long title (e.g., Comprehensive Digital Marketing)"
             value={longTitle}
             onChange={(e) => setLongTitle(e.target.value)}
             className="w-full border-gray-300 rounded-md"
+            required
           />
         </div>
 
-        <div className="mb-4 w-3/5">
-          <label className="block mb-1 font-medium">Short title*</label>
+        <div className="mb-6 w-3/5">
+          <label className="block mb-2 text-sm font-medium">Short title*</label>
           <Input
-            placeholder="Enter short title"
+            placeholder="Enter short title (e.g., Digital Marketing)"
             value={shortTitle}
             onChange={(e) => setShortTitle(e.target.value)}
             className="w-full border-gray-300 rounded-md"
+            required
           />
         </div>
 
         {/* Short Description */}
-        <div className="mb-6">
-          <label className="block mb-1 font-medium">Short description*</label>
-          <Toolbar editor={shortDescEditor} />
-          <div className="border p-3 rounded-md min-h-[120px] bg-white">
-            <EditorContent editor={shortDescEditor} />
-          </div>
+        <div className="mb-6 w-3/5">
+          <label className="block mb-2 text-sm font-medium">
+            Short description*
+          </label>
+          <TiptapEditor
+            content={shortDesc}
+            onChange={(content) => setShortDesc(content)}
+          />
         </div>
 
         {/* Long Description */}
-        <div className="mb-6">
-          <label className="block mb-1 font-medium">Long description*</label>
-          <Toolbar editor={longDescEditor} />
-          <div className="border p-3 rounded-md min-h-[180px] bg-white">
-            <EditorContent editor={longDescEditor} />
-          </div>
+        <div className="mb-6 w-3/5">
+          <label className="block mb-2 text-sm font-medium">
+            Detailed description*
+          </label>
+          <TiptapEditor
+            content={longDesc}
+            onChange={(content) => setLongDesc(content)}
+          />
         </div>
 
-        {/* Buttons */}
+        {/* Action Buttons */}
         <div className="flex gap-4 mt-8">
           <Button
             variant="outline"
-            className="bg-gray-100 text-gray-700 hover:bg-gray-200 cursor-pointer"
+            className="bg-white border-orange-200 text-gray-700 hover:bg-gray-100"
+            disabled={isSubmitting}
           >
-            Save to draft
+            Save as Draft
           </Button>
           <Button
-            className="bg-[#e88c1d] hover:bg-[#cf7a13] text-white cursor-pointer"
+            className="bg-[#FF9B21] hover:bg-[#e88c1d] text-white"
             onClick={handlePublish}
+            disabled={isSubmitting}
           >
-            Publish
+            {isSubmitting ? "Publishing..." : "Publish"}
           </Button>
         </div>
       </div>
