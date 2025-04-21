@@ -61,7 +61,7 @@ const navItems = [
   {
     name: "About us page mgt",
     icon: <RiInformationLine size={20} />,
-    path: "/about-us-management",
+    path: "/about-management",
     permission: null, // Add appropriate permission
   },
   {

@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             <div className="flex min-h-screen">
                 <AppSidebar />
                 <SidebarInset className="bg-[#FFFFFF]">
-                    <header className="bg-white sticky top-0 flex h-16 shrink-0 items-center justify-between border-b px-6">
+                    <header className="bg-white z-10 sticky top-0 flex h-16 shrink-0 items-center justify-between border-b px-6">
                         <div className="flex items-center gap-2">
                             <SidebarTrigger className="hidden md:flex" />
                         </div>
