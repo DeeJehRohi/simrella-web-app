@@ -13,6 +13,7 @@ import { getBlogPosts } from "@/actions/blog";
 import type { BlogPost } from "@/types/api";
 import Link from "next/link";
 import { toast } from "sonner";
+import Pagination from "@/components/pagination";
 import { BlogDeleteDialog } from "@/components/blog/blog-delete-dialog";
 
 export default function BlogManagementPage() {
@@ -183,7 +184,6 @@ export default function BlogManagementPage() {
               </button>
             </form>
           </div>
-
           {/* Blog posts list */}
           <div className="space-y-6">
             {isLoading ? (
@@ -296,57 +296,14 @@ export default function BlogManagementPage() {
               ))
             )}
           </div>
-
           {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex gap-4 items-center mt-16">
-              <span className="text-xs text-black font-medium">
-                Showing {1 + (currentPage - 1) * 10}-
-                {Math.min(currentPage * 10, totalItems)} of {totalItems}
-              </span>
-              <div className="flex items-center space-x-2">
-                <button
-                  className="px-1 py-1 bg-gray-100 hover:text-white hover:bg-[#2c2c2c] rounded-lg"
-                  disabled={currentPage === 1}
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.max(prev - 1, 1))
-                  }
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </button>
-                {Array.from({ length: Math.min(5, totalPages) }, (_, index) => {
-                  const pageNumber = index + 1;
-                  return (
-                    <button
-                      key={pageNumber}
-                      className={`px-3 py-1 rounded-lg text-white text-xs ${
-                        currentPage === pageNumber
-                          ? "bg-[#2c2c2c]"
-                          : "bg-[#aeaeae]"
-                      }`}
-                      onClick={() => setCurrentPage(pageNumber)}
-                    >
-                      {pageNumber}
-                    </button>
-                  );
-                })}
-                {totalPages > 5 && (
-                  <button className="px-3 py-1 bg-[#aeaeae] rounded-lg text-white text-xs">
-                    ...
-                  </button>
-                )}
-                <button
-                  className="px-1 py-1 bg-gray-100 hover:text-white hover:bg-[#2c2c2c] rounded-lg"
-                  disabled={currentPage === totalPages}
-                  onClick={() =>
-                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                  }
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </button>
-              </div>
-            </div>
-          )}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            itemsPerPage={10}
+            onPageChange={(page) => setCurrentPage(page)}
+          />
         </div>
       </div>
     </div>

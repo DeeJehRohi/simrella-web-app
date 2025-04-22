@@ -57,7 +57,7 @@ export default function AboutSection() {
       {/* === Banner Section === */}
       <section>
         <p className="text-sm font-medium mt-1">Banner Image</p>
-        <div className="mt-2 relative w-full max-w-4xl">
+        <div className="mt-2 mb-16 relative w-full max-w-4xl">
           <Image src={sampleImg} alt="Banner" className="w-full rounded-md" />
           <button
             onClick={() => setEditBannerOpen(true)}
